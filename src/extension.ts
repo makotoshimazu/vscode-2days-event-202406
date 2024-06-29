@@ -37,7 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
   const progateSubmitDisposable = vscode.commands.registerCommand(
     "progate-cli-extension.runProgateSubmit",
     async () => {
-      vscode.window.showInformationMessage("Start running `progate submit`...");
+      vscode.window.showInformationMessage("Start running progate submit...");
       await provider.runProgateSubmit();
       const doc = await vscode.workspace.openTextDocument(
         ProgateSubmitContentProvider.uri

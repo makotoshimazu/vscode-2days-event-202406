@@ -1,4 +1,5 @@
 import { exec } from "node:child_process";
+import path from "node:path";
 import * as vscode from "vscode";
 
 export class ProgateSubmitContentProvider
@@ -54,19 +55,31 @@ type SubmitResult =
     };
 
 const runProgateSubmit = async (): Promise<SubmitResult> => {
+  let baseDir;
   if (!vscode.workspace.workspaceFolders) {
-    return { result: "error", message: "No workspace is opened" };
+    // return { result: "error", message: "No workspace is opened" };
+
+    const activeFileUri = vscode.window.activeTextEditor?.document.uri;
+    if (!activeFileUri) {
+      return { result: "error", message: "no workspace and no active editor." };
+    }
+    if (activeFileUri.scheme !== "file") {
+      return { result: "error", message: "not a file scheme." };
+    }
+    baseDir = path.dirname(activeFileUri.fsPath);
+  } else {
+    const pathFolders = vscode.workspace.workspaceFolders?.filter((folder) =>
+      /\/progate_path\//.test(folder.uri.fsPath)
+    );
+
+    if (pathFolders === undefined || pathFolders.length === 0) {
+      return {
+        result: "error",
+        message: "No progate_path workspace is opened",
+      };
+    }
+    baseDir = pathFolders[0].uri.fsPath;
   }
-
-  const pathFolders = vscode.workspace.workspaceFolders?.filter((folder) =>
-    /\/progate_path\//.test(folder.uri.fsPath)
-  );
-
-  if (pathFolders === undefined || pathFolders.length === 0) {
-    return { result: "error", message: "No progate_path folder is found" };
-  }
-
-  const path = vscode.workspace.workspaceFolders[0].uri.fsPath;
 
   let promiseResolve: (value: SubmitResult) => void;
 
@@ -74,7 +87,7 @@ const runProgateSubmit = async (): Promise<SubmitResult> => {
     (resolve) => (promiseResolve = resolve)
   );
 
-  exec("progate submit", { cwd: path }, (error, stdout, stderr) => {
+  exec("progate submit", { cwd: baseDir }, (error, stdout, stderr) => {
     if (error) {
       promiseResolve({ result: "error", message: error.message });
     }

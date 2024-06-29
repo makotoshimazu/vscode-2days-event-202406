@@ -19,7 +19,7 @@
       },
       {
         "command": "progate-cli-extension.runProgateSubmit",
-        "title": "Run `progate submit`"
+        "title": "Run progate submit"
       }
     ]
   },
