@@ -1,6 +1,8 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
+import { exec } from "node:child_process";
 import * as vscode from "vscode";
+import { ProgateSubmitContentProvider } from "./provider";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -25,18 +27,30 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(helloProgateDisposable);
+  const provider = new ProgateSubmitContentProvider();
+  const providerRegistration =
+    vscode.workspace.registerTextDocumentContentProvider(
+      ProgateSubmitContentProvider.scheme,
+      provider
+    );
 
   const progateSubmitDisposable = vscode.commands.registerCommand(
     "progate-cli-extension.runProgateSubmit",
-    () => {
-      const terminal = vscode.window.createTerminal("progate submit");
-      terminal.sendText("progate submit\n");
-      terminal.show();
+    async () => {
+      vscode.window.showInformationMessage("Start running `progate submit`...");
+      await provider.runProgateSubmit();
+      const doc = await vscode.workspace.openTextDocument(
+        ProgateSubmitContentProvider.uri
+      );
+      vscode.window.showTextDocument(doc);
     }
   );
 
-  context.subscriptions.push(progateSubmitDisposable);
+  context.subscriptions.push(
+    helloProgateDisposable,
+    progateSubmitDisposable,
+    providerRegistration
+  );
 }
 
 // This method is called when your extension is deactivated
