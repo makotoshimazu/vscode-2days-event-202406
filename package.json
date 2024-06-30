@@ -1,6 +1,8 @@
 {
   "name": "progate-cli-extension",
   "displayName": "progate-cli-extension",
+  "publisher": "makotoshimazu",
+  "repository": "github:makotoshimazu/vscode-2days-event-202406",
   "description": "",
   "version": "0.0.1",
   "engines": {
